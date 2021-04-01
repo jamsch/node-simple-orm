@@ -1,0 +1,21 @@
+{
+  "name": "node-simple-orm",
+  "version": "0.0.1",
+  "author": "jamsch",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jamsch/node-simple-orm.git"
+  },
+  "description": "A simple ORM for building queries in Node.js. Please don't use this in production.",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc index.ts --outDir dist"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "devDependencies": {
+    "@tsconfig/deno": "^1.0.5",
+    "typescript": "^4.2.3"
+  }
+}
