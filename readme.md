@@ -23,7 +23,7 @@ class User extends Model {
   static table = "users"; // (Optional) defaults to snake_case class name + "s" (e.g. "ForumPost" => "forum_posts")
   static relationships = {
     forumPosts: User.hasMany("forum_posts"), // or ForumPost.getTable()
-    products: User.hasManyThrough("user_products"),
+    products: User.hasManyThrough(UserProduct.getTable()), // or "user_products"
   };
 }
 ```
