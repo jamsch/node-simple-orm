@@ -20,7 +20,7 @@ class ForumPost extends Model {}
 class UserProduct extends Model {}
 
 class User extends Model {
-  static table = "users"; // Default: snake_case class name + "s" (e.g. "ForumPost" => "forum_posts")
+  static table = "users"; // (Optional) defaults to snake_case class name + "s" (e.g. "ForumPost" => "forum_posts")
   static relationships = {
     forumPosts: User.hasMany("forum_posts"), // or ForumPost.getTable()
     products: User.hasManyThrough("user_products"),
