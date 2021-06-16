@@ -2,27 +2,21 @@ import Relationship from "./Relationship.ts";
 import type { ModelClass } from "./typings.ts";
 
 type Mode = "SELECT" | "INSERT" | "UPDATE" | "DELETE";
-type Where = Array<
-  | {
-      column: string;
-      operator: Operator;
-      value: string | number | string[] | number[];
-    }
-  | QueryBuilder
->;
+type Operator = "=" | "<>" | ">" | "<" | "LIKE" | "IN";
+type WhereFilter = {
+  column: string;
+  operator: Operator;
+  value: string | number | string[] | number[];
+};
+type Where = (WhereFilter | QueryBuilder)[];
 type Order = Array<{ column: string; direction: "asc" | "desc" }>;
 type QueryBuilderCallback = (instance: QueryBuilder) => void;
-type Operator = "=" | "<>" | ">" | "<" | "LIKE" | "IN";
-const where = ["abcd", "cdb"];
-
 type WhereParams =
   | [QueryBuilderCallback]
   | [Record<string, string | number>]
   | [string, string | number]
   | [string, Operator, string | number];
-
 type Limit = [number] | [number, number];
-
 type WhereHas = { relationship: string; builder: QueryBuilder };
 
 const esc = (s: string | number) => (typeof s === "number" ? s : `\`${s}\``);
@@ -34,6 +28,7 @@ export default class QueryBuilder {
     table: undefined as string | undefined,
     relationships: {} as Record<string, Relationship>,
   };
+
   parts = {
     columns: [] as string[],
     where: [] as Where,
@@ -104,11 +99,9 @@ export default class QueryBuilder {
       if (!insert) {
         throw new Error("No values found");
       }
-      const columns = Object.keys(insert);
-      const values = Object.values(insert);
-      return `INSERT INTO ${this.context.table} (${columns
-        .map(esc)
-        .join(", ")}) VALUES (${values.map(esc).join(", ")})`;
+      const columnList = Object.keys(insert).map(esc).join(", ");
+      const valuesList = Object.values(insert).map(esc).join(", ");
+      return `INSERT INTO ${this.context.table} (${columnList}) VALUES (${valuesList})`;
     }
 
     const columnQuery = columns.join(", ") || "*";
@@ -118,14 +111,14 @@ export default class QueryBuilder {
       let built = this.mode ? " WHERE " : "";
 
       if (where.length > 0) {
-        built += `${this.buildWhereFilter("where")}`;
+        built += this.buildWhereFilter("where");
       }
 
       if (whereHas.length > 0) {
         if (where.length > 0) {
           built += " AND ";
         }
-        built += `${this.buildWhereHasFilter("whereHas")}`;
+        built += this.buildWhereHasFilter("whereHas");
       }
 
       // Make sure we're filtering by "WHERE"
@@ -144,30 +137,19 @@ export default class QueryBuilder {
       return built;
     })();
 
-    const orderQuery =
-      order.length > 0
-        ? " ORDER BY " +
-          order.map((o) => `${o.column} ${o.direction}`).join(", ")
-        : "";
-
+    const orderColumns = order.map(o => `${o.column} ${o.direction}`).join(", ");
+    const orderQuery = orderColumns ? ` ORDER BY ${orderColumns}` : "";
     const limitQuery = limit ? ` LIMIT ${limit.join(", ")}` : "";
 
-    const joinQuery =
-      join.length > 0
-        ? join
-            .map(
-              (j) =>
-                ` JOIN ${esc(j.foreignTable)} ON ${esc(j.localTable)}.${esc(
-                  j.localKey
-                )} = ${esc(j.foreignTable)}.${esc(j.foreignKey)}`
-            )
-            .join(", ")
-        : "";
+    const joinQuery = join
+      .map(j => ` JOIN ${esc(j.foreignTable)} ON ${esc(j.localTable)}.${esc(j.localKey)} = ${esc(j.foreignTable)}.${esc(j.foreignKey)}`)
+      .join(", ");
 
     if (this.mode === "SELECT") {
       return `${this.mode} ${columnQuery} FROM ${this.context.table}${joinQuery}${whereQuery}${orderQuery}${limitQuery}`;
-    } else if (!this.mode) {
-      return `${whereQuery}`;
+    }
+    if (!this.mode) {
+      return whereQuery;
     }
     throw new Error("Not implemented");
   }
@@ -211,11 +193,7 @@ export default class QueryBuilder {
         });
       }
     } else {
-      const [column, operator, value] = ((): [
-        string,
-        Operator,
-        string | number
-      ] => {
+      const [column, operator, value] = ((): [string, Operator, string | number] => {
         if (paramsOrCallback.length === 3) {
           return paramsOrCallback;
         }
@@ -284,9 +262,7 @@ export default class QueryBuilder {
 
   orderBy(...order: Order | [string] | [string, "asc" | "desc"]) {
     if (typeof order[0] === "string") {
-      const [column, direction = "asc"] = order as
-        | [string]
-        | [string, "asc" | "desc"];
+      const [column, direction = "asc"] = order as [string] | [string, "asc" | "desc"];
       this.parts.order.push({ column, direction });
     } else {
       this.parts.order.push(...(order as Order));
