@@ -1,6 +1,6 @@
 # simple-orm
 
-A simple ORM for building queries in Node.js. This ORM is largely built around the [Eloquent ORM](https://laravel.com/docs/8.x/eloquent) used by Laravel. **Note: this library currently only outputs SQL to be executed by a MySQL client**.
+A simple ORM for building queries in JavaScript. This ORM is largely built around the [Eloquent ORM](https://laravel.com/docs/8.x/eloquent) used by Laravel. **Note: this library currently only outputs SQL to be executed by a MySQL client**.
 
 ## Warning
 
