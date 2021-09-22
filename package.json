@@ -1,12 +1,12 @@
 {
-  "name": "node-simple-orm",
+  "name": "simple-orm",
   "version": "0.0.1",
   "author": "jamsch",
   "repository": {
     "type": "git",
-    "url": "git://github.com/jamsch/node-simple-orm.git"
+    "url": "git://github.com/jamsch/simple-orm.git"
   },
-  "description": "A simple ORM for building queries in Node.js. Please don't use this in production.",
+  "description": "A simple ORM for building queries in JavaScript. Please don't use this in production.",
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
